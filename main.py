@@ -77,12 +77,10 @@ class Editor(QMainWindow):
         self.current = tuple(self.table.item(0, i).text() for i in range(7))
         with sqlite3.connect('coffee.sqlite') as con:
             if int(self.current[0]) > self.n:
-                print(self.current[1:])
                 con.cursor().execute("INSERT INTO coffee(ID, grade, roasting, is_ground, "
                                      "taste, price, volume) VALUES(?, ?, ?, ?, ?, ?, ?)",
                                      self.current)
             for i in range(1, 7):
-                print((self.table.horizontalHeaderItem(i).text(), self.current[i], i))
                 con.cursor().execute(f"UPDATE coffee SET {self.table.horizontalHeaderItem(i).text()}"
                                      f" = ? WHERE ID = ?", (self.current[i], self.current[0]))
         self.table.resizeColumnsToContents()
