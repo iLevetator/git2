@@ -5,19 +5,20 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
-from PyQt5.uic.properties import QtGui
+from UI.main import Ui_MainWindow as main_ui
+from UI.addEditCoffeeForm import Ui_MainWindow as second_ui
 
 
-class Coffee(QMainWindow):
+class Coffee(QMainWindow, main_ui):
     def __init__(self):
         super().__init__()
-        uic.loadUi('main.ui', self)
+        self.setupUi(self)
         self.move(600, 300)
         self.load_table()
         self.load_editor()
 
     def load_table(self):
-        with sqlite3.connect('coffee.sqlite') as con:
+        with sqlite3.connect('data/coffee.sqlite') as con:
             res = con.cursor().execute("SELECT * FROM coffee").fetchall()
         self.n = len(res)
         self.table.setColumnCount(7)
@@ -40,10 +41,10 @@ class Coffee(QMainWindow):
         self.next.close()
 
 
-class Editor(QMainWindow):
+class Editor(QMainWindow, second_ui):
     def __init__(self, n):
         super().__init__()
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
         self.ID.setMaximum(n)
         self.n = n
         self.btn_new.clicked.connect(self.new)
@@ -64,7 +65,7 @@ class Editor(QMainWindow):
             self.table.setItem(0, j, QTableWidgetItem(str(elem)))
 
     def load(self):
-        with sqlite3.connect('coffee.sqlite') as con:
+        with sqlite3.connect('data/coffee.sqlite') as con:
             self.n = len(con.cursor().execute("SELECT * FROM coffee").fetchall())
             self.ID.setMaximum(self.n)
             self.current = con.cursor().execute("SELECT * FROM coffee WHERE ID = ?",
@@ -75,7 +76,7 @@ class Editor(QMainWindow):
 
     def edit(self):
         self.current = tuple(self.table.item(0, i).text() for i in range(7))
-        with sqlite3.connect('coffee.sqlite') as con:
+        with sqlite3.connect('data/coffee.sqlite') as con:
             if int(self.current[0]) > self.n:
                 con.cursor().execute("INSERT INTO coffee(ID, grade, roasting, is_ground, "
                                      "taste, price, volume) VALUES(?, ?, ?, ?, ?, ?, ?)",
